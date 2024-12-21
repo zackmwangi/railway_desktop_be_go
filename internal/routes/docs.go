@@ -10,6 +10,6 @@ func AddDocsEndpoints(httpRoutingEngine *gin.Engine, c *config.AppConfig) *gin.E
 	vx := "v1" //TODO: Pull from config c
 	vxRouterGroup := httpRoutingEngine.Group(vx).Use().(*gin.RouterGroup)
 	vxRouterGroup.Static("/docs/openapi", "./docs/dist/")
-	//httpRoutingEngine.Static("/docs/openapi", "./docs/dist/")
+
 	return httpRoutingEngine
 }

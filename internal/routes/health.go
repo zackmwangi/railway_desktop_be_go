@@ -7,7 +7,7 @@ import (
 )
 
 func AddHealthEndpoints(httpRoutingEngine *gin.Engine, c *config.AppConfig) *gin.Engine {
-	//*api.Servers s = *api.Servers
+
 	httpRoutingEngine.GET(c.HealthEndpointPrefix+c.HealthEndpointLive, gin.WrapH(health.NewHandler(c.HealthCheckerLive)))
 	httpRoutingEngine.GET(c.HealthEndpointPrefix+c.HealthEndpointReady, gin.WrapH(health.NewHandler(c.HealthCheckerReady)))
 

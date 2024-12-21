@@ -44,8 +44,6 @@ type (
 	// type
 	Servers struct {
 		AppConfig *config.AppConfig
-		//HealthCheckerLive  health.Checker
-		//HealthCheckerReady health.Checker
 
 		Grpc   *MyGrpcServer
 		Http   *MyHttpServer
