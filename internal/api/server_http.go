@@ -26,8 +26,15 @@ func InitHTTPRoutingEngine(c *config.AppConfig) *gin.Engine {
 	}
 
 	globalHTTPRoutingEngine.Use(ginzap.Ginzap(myLogger, time.RFC3339, true))
-	//TODO: Add HTTP middleware for validation
 	//TODO: Add HTTP middleware for rate limiting/throttling
+	//TODO: Add HTTP middleware for TLS enforcement
+	//TODO: Add HTTP middleware for request validation
+	//TODO: Add HTTP middleware for compression
+	//TODO: Add HTTP middleware for CORS
+	//TODO: Add HTTP middleware for request id/telemetry
+	//################
+	globalHTTPRoutingEngine.Use(ginzap.RecoveryWithZap(myLogger, true))
+	globalHTTPRoutingEngine.Use(gin.Recovery())
 	return globalHTTPRoutingEngine
 }
 
@@ -35,15 +42,15 @@ func AddHttpEndpoints(httpRoutingEngine *gin.Engine, c *config.AppConfig, s *Ser
 
 	routes.AddHealthEndpoints(httpRoutingEngine, c)
 	routes.AddDocsEndpoints(httpRoutingEngine, c)
-	routes.AddGrpcGatewayEndpoints(httpRoutingEngine, c, s.Grpc.Gmux)
+	//
 	//#
 	//
-
+	routes.AddGrpcGatewayEndpoints(httpRoutingEngine, s.Grpc.gmux)
 	//
 	//#
 	//Fallback to 404
 	httpRoutingEngine.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, gin.H{"error_info": "Requested resource not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error_info": "Requested resource was not found"})
 	})
 
 	return httpRoutingEngine

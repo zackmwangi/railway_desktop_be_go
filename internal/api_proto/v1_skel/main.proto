@@ -1,12 +1,28 @@
 syntax = "proto3";
-package svc.shell.v1;
+
+package mybackend.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
 option go_package = "./internal/api_proto/v1";
+//option go_package = "github.com/zackmwangi/railway_desktop_be_go/internal/api_proto/v1";
 
 //#####################
 
-service MybackendSvc{
-    rpc GetUserInfoById (GetUserInfoByIdRequest) returns (GetUserInfoByIdResponse){}
-    rpc GetUserInfoByUsername (GetUserInfoByUsernameRequest) returns (GetUserInfoByUsernameResponse){}
+service MybackendGrpcSvc{
+    rpc GetUserInfoById (GetUserInfoByIdRequest) returns (GetUserInfoByIdResponse){
+        option (google.api.http) = {
+            get: "/v1/user/byid",
+          };
+    }
+    rpc GetUserInfoByUsername (GetUserInfoByUsernameRequest) returns (GetUserInfoByUsernameResponse){
+        option (google.api.http) = {
+            get: "/v1/user/byusername",
+          };
+    }
 }
 
 //#######

@@ -4,11 +4,16 @@
 ```sh
 
 brew install protoc
+
 brew install protoc-gen-go
 brew install protoc-gen-go-grpc
+
 brew install buf
 brew install grpcurl
-go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
+
+go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
 ```
@@ -31,8 +36,9 @@ touch buf.gen.yaml
 - Add relevant contents into the buf.yaml file, which declares the major dps and core buf config
 - add relevant contents into the buf.gen.yaml file, which controls destination of protoc-generated outputs
 - run the buf update for to download any modules that are declared as dependencies in the buf.yaml file, which produces a buf.lock file
+
 ```sh
-buf mod update
+buf dep update
 ```
 
 ## working
@@ -58,9 +64,20 @@ buf generate
 
 grpcurl --plaintext 127.0.0.1:8082 describe
 
-grpcurl -d '{"userName":"JohnCena"}' --plaintext 127.0.0.1:8082  svc.shell.v1.MybackendSvc/GetUserInfoByUsername
+grpcurl -d '{"userName":"JohnCena"}' --plaintext 127.0.0.1:8082  mybackend.v1.MybackendGrpcSvc/GetUserInfoByUsername
 
-grpcurl -d '{"userId":"SOME-UUID"}' --plaintext 127.0.0.1:8082  svc.shell.v1.MybackendSvc/GetUserInfoById
+grpcurl -d '{"userId":"SOME-UUID"}' --plaintext 127.0.0.1:8082  mybackend.v1.MybackendGrpcSvc/GetUserInfoById
+
+curl -X 'GET' \
+  'http://localhost:8081/v1/user/byusername?userName=zack' \
+  -H 'accept: application/json' \
+  -H 'Authorization: test'
+
+curl -X 'GET' \
+  'http://localhost:8081/v1/user/byid' \
+  -H 'accept: application/json' \
+  -H 'Authorization: test'
+
 
 ```
 

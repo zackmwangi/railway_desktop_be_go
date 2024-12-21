@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -16,6 +17,7 @@ import (
 	"github.com/zackmwangi/railway_desktop_be_go/internal/config"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
 
@@ -24,63 +26,72 @@ import (
 )
 
 type (
-
-	// type
-	MyHttpServer struct {
-		Http   *http.Server
-		Logger *zap.Logger
-		Hmux   *gin.Engine
-		Config *config.AppConfig
-	}
-
-	//type
-	MyGrpcServer struct {
-		Grpc   *grpc.Server
-		Logger *zap.Logger
-		Gmux   *runtime.ServeMux
-		Config *config.AppConfig
-	}
-
-	// type
 	Servers struct {
 		AppConfig *config.AppConfig
+		Grpc      *MyGrpcServer
+		Http      *MyHttpServer
+		stopFn    sync.Once
+	}
 
-		Grpc   *MyGrpcServer
-		Http   *MyHttpServer
-		stopFn sync.Once
+	MyHttpServer struct {
+		http   *http.Server
+		logger *zap.Logger
+		hmux   *gin.Engine
+		config *config.AppConfig
+	}
+
+	MyGrpcServer struct {
+		grpc   *grpc.Server
+		logger *zap.Logger
+		gmux   *runtime.ServeMux
+		config *config.AppConfig
 	}
 )
 
 // ################################################################
 // # HTTP
-func (s *MyHttpServer) Run(ctx context.Context, httpAddr string) error {
+func (s *MyHttpServer) Run(ctx context.Context, httpAddr string, grpcAddress string) error {
 
 	httpListener, err := net.Listen("tcp", httpAddr)
 
 	if err != nil {
-		s.Logger.Fatal("error on http address : " + httpAddr)
+		s.logger.Fatal("error on http address : " + httpAddr)
 		os.Exit(1)
 	}
 
-	s.Http = &http.Server{
+	hs := &http.Server{
 		//TODO: add these to main config
-		Handler:        s.Hmux,
+		Handler:        s.hmux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		IdleTimeout:    120 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	s.Logger.Sugar().Infof("HTTP service listening at %s", httpAddr)
-	return s.Http.Serve(httpListener)
+	// Register gRPC server endpoint
+	// Note: Make sure the gRPC server is running properly and accessible
+	grpcServerEndpoint := flag.String("grpc-server-endpoint", grpcAddress, "gRPC server endpoint")
+	mux := runtime.NewServeMux()
+
+	grpcDialOpts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+
+	err = v1.RegisterMybackendGrpcSvcHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, grpcDialOpts)
+	if err != nil {
+		return err
+	}
+
+	s.http = hs
+
+	s.logger.Sugar().Infof("HTTP service listening at %s", httpAddr)
+	return s.http.Serve(httpListener)
 }
 
 func (s *MyHttpServer) Shutdown(ctx context.Context) {
-	s.Logger.Sugar().Infof("HTTP service gracefully shutting down ")
+	s.logger.Sugar().Infof("HTTP service gracefully shutting down ")
 
-	if s.Http != nil {
-		if err := s.Http.Shutdown(ctx); err != nil {
-			s.Logger.Fatal("graceful shutdown of HTTP service failed ")
+	if s.http != nil {
+		if err := s.http.Shutdown(ctx); err != nil {
+			s.logger.Fatal("graceful shutdown of HTTP service failed ")
 		}
 	}
 }
@@ -95,51 +106,52 @@ func (s *MyGrpcServer) Run(ctx context.Context, grpcAddress string) error {
 
 	if err != nil {
 
-		s.Logger.Sugar().Fatalf("error on grpc address : %s", err)
+		s.logger.Sugar().Fatalf("error on grpc address : %s", err)
 
 	}
 
-	s.Grpc = grpc.NewServer(
+	s.grpc = grpc.NewServer(
 		grpc.KeepaliveParams(keepalive.ServerParameters{
 			MaxConnectionIdle: 5 * time.Minute,
 		}),
 	)
 
-	reflection.Register(s.Grpc)
+	reflection.Register(s.grpc)
 
 	//############################################################
 	//Register gRPC base services
 
-	MybackendSvcServerImpl := NewMybackendSvcServerImpl(s.Config)
-	v1.RegisterMybackendSvcServer(s.Grpc, MybackendSvcServerImpl)
+	MybackendGrpcSvcServerImpl := NewMybackendGrpcSvcServerImpl(s.config)
+	v1.RegisterMybackendGrpcSvcServer(s.grpc, MybackendGrpcSvcServerImpl)
 
 	//########################
-	/*
-		//Register grpc-gateway for HTTP-like API
-		grpcDialOpts := []grpc.DialOption{
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		}
 
-		errX := v1.RegisterMybackendSvcHandlerFromEndpoint(ctx, s.Gmux, grpcAddress, grpcDialOpts)
+	//Register grpc-gateway for HTTP-like API
+	grpcDialOpts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	}
 
-		if errX != nil {
-			s.Logger.Sugar().Fatalf("failed to serve gRPC gateway : %s", err)
-		}
-	*/
+	errX := v1.RegisterMybackendGrpcSvcHandlerFromEndpoint(ctx, s.gmux, grpcAddress, grpcDialOpts)
+
+	if errX != nil {
+		s.logger.Sugar().Fatalf("failed to serve gRPC gateway : %s", err)
+		return errX
+	}
+
 	//########################
-	s.Logger.Sugar().Infof("gRPC service listening at %v", lis.Addr())
-	return s.Grpc.Serve(lis)
+	s.logger.Sugar().Infof("gRPC service listening at %v", lis.Addr())
+	return s.grpc.Serve(lis)
 
 }
 
 func (s *MyGrpcServer) Shutdown(ctx context.Context) {
-	s.Logger.Sugar().Infof("gRPC service gracefully shutting down ")
+	s.logger.Sugar().Infof("gRPC service gracefully shutting down ")
 
 	done := make(chan struct{}, 1)
 
 	go func() {
-		if s.Grpc != nil {
-			s.Grpc.GracefulStop()
+		if s.grpc != nil {
+			s.grpc.GracefulStop()
 		}
 		done <- struct{}{}
 	}()
@@ -147,10 +159,10 @@ func (s *MyGrpcServer) Shutdown(ctx context.Context) {
 	select {
 	case <-done:
 	case <-ctx.Done():
-		if s.Grpc != nil {
-			s.Grpc.Stop()
+		if s.grpc != nil {
+			s.grpc.Stop()
 		}
-		s.Logger.Fatal("graceful shutdown of gRPC server failed. ")
+		s.logger.Fatal("graceful shutdown of gRPC server failed. ")
 	}
 }
 
@@ -165,30 +177,30 @@ func (s *Servers) Run(ctx context.Context) (err error) {
 
 	grpcGwMux := s.getGrpcGwMux(s.AppConfig)
 	s.Grpc = &MyGrpcServer{
-		Logger: s.AppConfig.AppLogger,
-		Gmux:   grpcGwMux,
-		Config: s.AppConfig,
+		logger: s.AppConfig.AppLogger,
+		gmux:   grpcGwMux,
+		config: s.AppConfig,
 	}
 
 	httpMux := s.getHttpMux(s.AppConfig)
 	s.Http = &MyHttpServer{
-		Logger: s.AppConfig.AppLogger,
-		Hmux:   httpMux,
-		Config: s.AppConfig,
+		logger: s.AppConfig.AppLogger,
+		hmux:   httpMux,
+		config: s.AppConfig,
 	}
 
 	go func() {
 		err := s.Grpc.Run(ctx, net.JoinHostPort(s.AppConfig.AppListenHostname, s.AppConfig.AppListenPortGrpc))
 		if err != nil {
-			err = fmt.Errorf("gRPC server stop : %w", err)
+			err = fmt.Errorf("gRPC server stopped : %w", err)
 		}
 		ec <- err
 	}()
 
 	go func() {
-		err := s.Http.Run(ctx, net.JoinHostPort(s.AppConfig.AppListenHostname, s.AppConfig.AppListenPortHttp))
+		err := s.Http.Run(ctx, net.JoinHostPort(s.AppConfig.AppListenHostname, s.AppConfig.AppListenPortHttp), net.JoinHostPort(s.AppConfig.AppListenHostname, s.AppConfig.AppListenPortGrpc))
 		if err != nil {
-			err = fmt.Errorf("HTTP Server stop : %w", err)
+			err = fmt.Errorf("HTTP server stopped : %w", err)
 		}
 		ec <- err
 	}()

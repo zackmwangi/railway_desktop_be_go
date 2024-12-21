@@ -19,7 +19,6 @@ type (
 
 		SvcName string
 		AppEnv  string
-		GinMode string
 
 		AppListenHostname string
 		AppListenPortHttp string
@@ -80,7 +79,6 @@ func InitAppConfig() *AppConfig {
 
 		SvcName: svcName,
 		AppEnv:  appEnv,
-		//GinMode: ginMode,
 
 		AppListenHostname: appListenHostname,
 		AppListenPortHttp: appListenPortHttp,

@@ -3,10 +3,9 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/zackmwangi/railway_desktop_be_go/internal/config"
 )
 
-func AddGrpcGatewayEndpoints(httpRoutingEngine *gin.Engine, c *config.AppConfig, s *runtime.ServeMux) *gin.Engine {
+func AddGrpcGatewayEndpoints(httpRoutingEngine *gin.Engine, s *runtime.ServeMux) *gin.Engine {
 
 	vx := "v1"
 	vxRouterGroup := httpRoutingEngine.Group(vx).Use().(*gin.RouterGroup)

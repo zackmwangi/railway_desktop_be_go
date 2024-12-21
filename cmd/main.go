@@ -26,6 +26,7 @@ func main() {
 	defer AppLogger.Sync()
 	appConfig.AppLogger = AppLogger
 
+	//Enable health check
 	healthCheckerReady := health.NewChecker(health.WithCacheDuration(1*time.Second),
 		health.WithTimeout(10*time.Second))
 
@@ -70,7 +71,7 @@ func main() {
 	}
 
 	if err != nil {
-		AppLogger.Sugar().Infof("service %s shutdown : %s", appConfig.SvcName, err)
+		AppLogger.Sugar().Infof("service %s has shutdown : %s", appConfig.SvcName, err)
 	}
 
 }

@@ -8,21 +8,21 @@ import (
 )
 
 type (
-	MybackendSvcServerImpl struct {
+	MybackendGrpcSvcServerImpl struct {
 		AppConfig *config.AppConfig
-		v1.UnimplementedMybackendSvcServer
+		v1.UnimplementedMybackendGrpcSvcServer
 	}
 )
 
-func NewMybackendSvcServerImpl(
+func NewMybackendGrpcSvcServerImpl(
 	ac *config.AppConfig,
-) v1.MybackendSvcServer {
-	return &MybackendSvcServerImpl{
+) v1.MybackendGrpcSvcServer {
+	return &MybackendGrpcSvcServerImpl{
 		AppConfig: ac,
 	}
 }
 
-func (s *MybackendSvcServerImpl) GetUserInfoById(ctx context.Context, req *v1.GetUserInfoByIdRequest) (*v1.GetUserInfoByIdResponse, error) {
+func (s *MybackendGrpcSvcServerImpl) GetUserInfoById(ctx context.Context, req *v1.GetUserInfoByIdRequest) (*v1.GetUserInfoByIdResponse, error) {
 
 	userIdById := req.GetUserId()
 
@@ -41,7 +41,7 @@ func (s *MybackendSvcServerImpl) GetUserInfoById(ctx context.Context, req *v1.Ge
 	}, nil
 }
 
-func (s *MybackendSvcServerImpl) GetUserInfoByUsername(ctx context.Context, req *v1.GetUserInfoByUsernameRequest) (*v1.GetUserInfoByUsernameResponse, error) {
+func (s *MybackendGrpcSvcServerImpl) GetUserInfoByUsername(ctx context.Context, req *v1.GetUserInfoByUsernameRequest) (*v1.GetUserInfoByUsernameResponse, error) {
 
 	userNameByUsername := req.GetUserName()
 	userIdByUsername := "UUID-JOHNCENA"
