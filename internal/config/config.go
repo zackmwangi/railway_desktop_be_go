@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 
+	"github.com/alexliesenfeld/health"
 	"github.com/joho/godotenv"
 	"github.com/zackmwangi/railway_desktop_be_go/internal/pkg/envo"
 	"go.uber.org/zap"
@@ -10,7 +11,9 @@ import (
 
 type (
 	AppConfig struct {
-		AppLogger *zap.Logger
+		AppLogger          *zap.Logger
+		HealthCheckerLive  health.Checker
+		HealthCheckerReady health.Checker
 
 		//################################
 
@@ -41,7 +44,7 @@ func InitAppConfig() *AppConfig {
 
 	//#HARD DEFAULTS
 	//########################
-	svcNameDefault := "iris-svc-admin-api"
+	svcNameDefault := "mybackend-svc-api"
 
 	appEnvDefault := "dev"
 
@@ -53,7 +56,7 @@ func InitAppConfig() *AppConfig {
 	appListenPortGrpcDefault := "8082"
 
 	healthEndpointPrefixDefault := "/"
-	healthEndpointLiveDefault := "live"
+	healthEndpointLiveDefault := "health"
 	healthEndpointReadyDefault := "ready"
 
 	//################################################################################################

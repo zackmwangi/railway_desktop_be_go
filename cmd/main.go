@@ -29,15 +29,17 @@ func main() {
 	healthCheckerReady := health.NewChecker(health.WithCacheDuration(1*time.Second),
 		health.WithTimeout(10*time.Second))
 
+	appConfig.HealthCheckerReady = healthCheckerReady
+
 	healthCheckerReady.Start()
 	healthCheckerLive := health.NewChecker()
+
+	appConfig.HealthCheckerLive = healthCheckerLive
 
 	//################################################################################################
 
 	s := &api.Servers{
-		AppConfig:          appConfig,
-		HealthCheckerLive:  healthCheckerLive,
-		HealthCheckerReady: healthCheckerReady,
+		AppConfig: appConfig,
 	}
 
 	//################################################################################################

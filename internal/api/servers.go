@@ -12,7 +12,6 @@ import (
 
 	"net/http"
 
-	"github.com/alexliesenfeld/health"
 	v1 "github.com/zackmwangi/railway_desktop_be_go/internal/api_proto/v1"
 	"github.com/zackmwangi/railway_desktop_be_go/internal/config"
 	"go.uber.org/zap"
@@ -24,29 +23,35 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
 
-type MyHttpServer struct {
-	Http   *http.Server
-	Logger *zap.Logger
-	Hmux   *gin.Engine
-	Config *config.AppConfig
-}
+type (
 
-type MyGrpcServer struct {
-	Grpc   *grpc.Server
-	Logger *zap.Logger
-	Gmux   *runtime.ServeMux
-	Config *config.AppConfig
-}
+	// type
+	MyHttpServer struct {
+		Http   *http.Server
+		Logger *zap.Logger
+		Hmux   *gin.Engine
+		Config *config.AppConfig
+	}
 
-type Servers struct {
-	AppConfig          *config.AppConfig
-	HealthCheckerLive  health.Checker
-	HealthCheckerReady health.Checker
+	//type
+	MyGrpcServer struct {
+		Grpc   *grpc.Server
+		Logger *zap.Logger
+		Gmux   *runtime.ServeMux
+		Config *config.AppConfig
+	}
 
-	Grpc   *MyGrpcServer
-	Http   *MyHttpServer
-	stopFn sync.Once
-}
+	// type
+	Servers struct {
+		AppConfig *config.AppConfig
+		//HealthCheckerLive  health.Checker
+		//HealthCheckerReady health.Checker
+
+		Grpc   *MyGrpcServer
+		Http   *MyHttpServer
+		stopFn sync.Once
+	}
+)
 
 // ################################################################
 // # HTTP
@@ -216,7 +221,7 @@ func (s *Servers) getGrpcGwMux(c *config.AppConfig) *runtime.ServeMux {
 
 func (s *Servers) getHttpMux(c *config.AppConfig) *gin.Engine {
 
-	httpRoutingEngine := initHTTPRoutingEngine(c)
+	httpRoutingEngine := InitHTTPRoutingEngine(c)
 	AddHttpEndpoints(httpRoutingEngine, c, s)
 	return httpRoutingEngine
 }

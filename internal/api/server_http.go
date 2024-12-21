@@ -7,12 +7,16 @@ import (
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 
-	api "github.com/zackmwangi/railway_desktop_be_go/internal/api/http_endpoints"
+	//api "github.com/zackmwangi/railway_desktop_be_go/internal/api/http_endpoints"
+	//api "github.com/zackmwangi/railway_desktop_be_go/internal/api/http_endpoints"
+	//api "github.com/zackmwangi/railway_desktop_be_go/internal/api/http_endpoints"
+
 	"github.com/zackmwangi/railway_desktop_be_go/internal/config"
+	"github.com/zackmwangi/railway_desktop_be_go/internal/routes"
 	"go.uber.org/zap"
 )
 
-func initHTTPRoutingEngine(c *config.AppConfig) *gin.Engine {
+func InitHTTPRoutingEngine(c *config.AppConfig) *gin.Engine {
 	globalHTTPRoutingEngine := gin.New()
 	var myLogger *zap.Logger
 
@@ -33,10 +37,16 @@ func initHTTPRoutingEngine(c *config.AppConfig) *gin.Engine {
 
 func AddHttpEndpoints(httpRoutingEngine *gin.Engine, c *config.AppConfig, s *Servers) *gin.Engine {
 
-	api.AddHealthEndpoints(httpRoutingEngine, c, s.HealthCheckerLive, s.HealthCheckerReady)
-	api.AddDocsEndpoints(httpRoutingEngine, c)
-	api.AddGrpcGatewayEndpoints(httpRoutingEngine, c, s.Grpc.Gmux)
+	//api.AddHealthEndpoints(httpRoutingEngine, c, s.HealthCheckerLive, s.HealthCheckerReady)
+	routes.AddHealthEndpoints(httpRoutingEngine, c)
+	routes.AddDocsEndpoints(httpRoutingEngine, c)
+	routes.AddGrpcGatewayEndpoints(httpRoutingEngine, c, s.Grpc.Gmux)
+	//#
+	//
 
+	//
+	//#
+	//Fallback to 404
 	httpRoutingEngine.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error_info": "Requested resource not found"})
 	})
