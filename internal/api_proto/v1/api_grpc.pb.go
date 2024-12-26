@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MybackendGrpcSvc_GetUserInfoById_FullMethodName       = "/mybackend.v1.MybackendGrpcSvc/GetUserInfoById"
-	MybackendGrpcSvc_GetUserInfoByUsername_FullMethodName = "/mybackend.v1.MybackendGrpcSvc/GetUserInfoByUsername"
+	MybackendGrpcSvc_GetUserInfoById_FullMethodName        = "/mybackend.v1.MybackendGrpcSvc/GetUserInfoById"
+	MybackendGrpcSvc_GetUserInfoByUsername_FullMethodName  = "/mybackend.v1.MybackendGrpcSvc/GetUserInfoByUsername"
+	MybackendGrpcSvc_ServiceCreateFromImage_FullMethodName = "/mybackend.v1.MybackendGrpcSvc/ServiceCreateFromImage"
+	MybackendGrpcSvc_DeleteService_FullMethodName          = "/mybackend.v1.MybackendGrpcSvc/DeleteService"
 )
 
 // MybackendGrpcSvcClient is the client API for MybackendGrpcSvc service.
@@ -29,6 +31,8 @@ const (
 type MybackendGrpcSvcClient interface {
 	GetUserInfoById(ctx context.Context, in *GetUserInfoByIdRequest, opts ...grpc.CallOption) (*GetUserInfoByIdResponse, error)
 	GetUserInfoByUsername(ctx context.Context, in *GetUserInfoByUsernameRequest, opts ...grpc.CallOption) (*GetUserInfoByUsernameResponse, error)
+	ServiceCreateFromImage(ctx context.Context, in *ServiceCreateFromImageRequest, opts ...grpc.CallOption) (*ServiceCreateFromImageResponse, error)
+	DeleteService(ctx context.Context, in *DeleteServiceRequest, opts ...grpc.CallOption) (*DeleteServiceResponse, error)
 }
 
 type mybackendGrpcSvcClient struct {
@@ -59,12 +63,34 @@ func (c *mybackendGrpcSvcClient) GetUserInfoByUsername(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *mybackendGrpcSvcClient) ServiceCreateFromImage(ctx context.Context, in *ServiceCreateFromImageRequest, opts ...grpc.CallOption) (*ServiceCreateFromImageResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ServiceCreateFromImageResponse)
+	err := c.cc.Invoke(ctx, MybackendGrpcSvc_ServiceCreateFromImage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mybackendGrpcSvcClient) DeleteService(ctx context.Context, in *DeleteServiceRequest, opts ...grpc.CallOption) (*DeleteServiceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteServiceResponse)
+	err := c.cc.Invoke(ctx, MybackendGrpcSvc_DeleteService_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MybackendGrpcSvcServer is the server API for MybackendGrpcSvc service.
 // All implementations should embed UnimplementedMybackendGrpcSvcServer
 // for forward compatibility.
 type MybackendGrpcSvcServer interface {
 	GetUserInfoById(context.Context, *GetUserInfoByIdRequest) (*GetUserInfoByIdResponse, error)
 	GetUserInfoByUsername(context.Context, *GetUserInfoByUsernameRequest) (*GetUserInfoByUsernameResponse, error)
+	ServiceCreateFromImage(context.Context, *ServiceCreateFromImageRequest) (*ServiceCreateFromImageResponse, error)
+	DeleteService(context.Context, *DeleteServiceRequest) (*DeleteServiceResponse, error)
 }
 
 // UnimplementedMybackendGrpcSvcServer should be embedded to have
@@ -79,6 +105,12 @@ func (UnimplementedMybackendGrpcSvcServer) GetUserInfoById(context.Context, *Get
 }
 func (UnimplementedMybackendGrpcSvcServer) GetUserInfoByUsername(context.Context, *GetUserInfoByUsernameRequest) (*GetUserInfoByUsernameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfoByUsername not implemented")
+}
+func (UnimplementedMybackendGrpcSvcServer) ServiceCreateFromImage(context.Context, *ServiceCreateFromImageRequest) (*ServiceCreateFromImageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ServiceCreateFromImage not implemented")
+}
+func (UnimplementedMybackendGrpcSvcServer) DeleteService(context.Context, *DeleteServiceRequest) (*DeleteServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteService not implemented")
 }
 func (UnimplementedMybackendGrpcSvcServer) testEmbeddedByValue() {}
 
@@ -136,6 +168,42 @@ func _MybackendGrpcSvc_GetUserInfoByUsername_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MybackendGrpcSvc_ServiceCreateFromImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceCreateFromImageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MybackendGrpcSvcServer).ServiceCreateFromImage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MybackendGrpcSvc_ServiceCreateFromImage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MybackendGrpcSvcServer).ServiceCreateFromImage(ctx, req.(*ServiceCreateFromImageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MybackendGrpcSvc_DeleteService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MybackendGrpcSvcServer).DeleteService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MybackendGrpcSvc_DeleteService_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MybackendGrpcSvcServer).DeleteService(ctx, req.(*DeleteServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MybackendGrpcSvc_ServiceDesc is the grpc.ServiceDesc for MybackendGrpcSvc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -150,6 +218,14 @@ var MybackendGrpcSvc_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserInfoByUsername",
 			Handler:    _MybackendGrpcSvc_GetUserInfoByUsername_Handler,
+		},
+		{
+			MethodName: "ServiceCreateFromImage",
+			Handler:    _MybackendGrpcSvc_ServiceCreateFromImage_Handler,
+		},
+		{
+			MethodName: "DeleteService",
+			Handler:    _MybackendGrpcSvc_DeleteService_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

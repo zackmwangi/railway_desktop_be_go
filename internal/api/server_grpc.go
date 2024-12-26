@@ -5,20 +5,26 @@ import (
 
 	v1 "github.com/zackmwangi/railway_desktop_be_go/internal/api_proto/v1"
 	"github.com/zackmwangi/railway_desktop_be_go/internal/config"
+	railwaySvc "github.com/zackmwangi/railway_desktop_be_go/internal/services/railway"
 )
 
 type (
 	MybackendGrpcSvcServerImpl struct {
-		AppConfig *config.AppConfig
+		railwayGraphqlServicesCollection *railwaySvc.RailwayGraphqlServicesCollection
 		v1.UnimplementedMybackendGrpcSvcServer
 	}
 )
 
+//RailwayGraphqlServicesCollection railwaySvc.RailwayGraphqlServicesCollection
+
 func NewMybackendGrpcSvcServerImpl(
 	ac *config.AppConfig,
 ) v1.MybackendGrpcSvcServer {
+
+	railwayGraphqlServicesCollection := railwaySvc.InitRailwayGraphqlServicesCollection(ac)
+
 	return &MybackendGrpcSvcServerImpl{
-		AppConfig: ac,
+		railwayGraphqlServicesCollection: railwayGraphqlServicesCollection,
 	}
 }
 
@@ -58,3 +64,27 @@ func (s *MybackendGrpcSvcServerImpl) GetUserInfoByUsername(ctx context.Context, 
 		Error:  nil,
 	}, nil
 }
+
+//################################
+//Railway
+//Projects+Environments
+
+// Services+Deployments
+// ServiceCreateFromImage()
+func (s *MybackendGrpcSvcServerImpl) ServiceCreateFromImage(ctx context.Context, req *v1.ServiceCreateFromImageRequest) (*v1.ServiceCreateFromImageResponse, error) {
+
+	//read the service image url
+
+	return s.railwayGraphqlServicesCollection.RailwayServicesSvc.ServiceCreateFromImage(ctx, req)
+
+}
+
+func (s *MybackendGrpcSvcServerImpl) DeleteService(ctx context.Context, req *v1.DeleteServiceRequest) (*v1.DeleteServiceResponse, error) {
+	return &v1.DeleteServiceResponse{}, nil
+}
+
+//Variables
+
+//Volumes
+
+//

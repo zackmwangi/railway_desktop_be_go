@@ -27,6 +27,12 @@ type (
 		HealthEndpointPrefix string
 		HealthEndpointLive   string
 		HealthEndpointReady  string
+
+		//###########
+		//Railway
+		RailwayGraphqlURL string
+		RailwayGraphqlToken string
+
 	}
 )
 
@@ -58,6 +64,9 @@ func InitAppConfig() *AppConfig {
 	healthEndpointLiveDefault := "health"
 	healthEndpointReadyDefault := "ready"
 
+	railwayGraphqlURLDefault := "https://backboard.railway.com/graphql/v2"
+	railwayGraphqlTokenDefault := ""
+
 	//################################################################################################
 
 	//# Swap hard defaults with .env/Configmap supplied values
@@ -73,6 +82,9 @@ func InitAppConfig() *AppConfig {
 	healthEndpointLive := envo.EnvString("HEALTH_ENDPOINT_LIVE", healthEndpointLiveDefault)
 	healthEndpointReady := envo.EnvString("HEALTH_ENDPOINT_READY", healthEndpointReadyDefault)
 
+	railwayGraphqlURL := envo.EnvString("RAILWAY_GRAPHQL_URL", railwayGraphqlURLDefault)
+	railwayGraphqlToken := envo.EnvString("RAILWAY_GRAPHQL_TOKEN", railwayGraphqlTokenDefault)
+
 	//################################################################################################
 
 	return &AppConfig{
@@ -87,6 +99,9 @@ func InitAppConfig() *AppConfig {
 		HealthEndpointPrefix: healthEndpointPrefix,
 		HealthEndpointLive:   healthEndpointLive,
 		HealthEndpointReady:  healthEndpointReady,
+
+		RailwayGraphqlURL: railwayGraphqlURL,
+		RailwayGraphqlToken: railwayGraphqlToken,
 	}
 
 }

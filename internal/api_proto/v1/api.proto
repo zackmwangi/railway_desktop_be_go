@@ -3,19 +3,24 @@ syntax = "proto3";
 package mybackend.v1;
 
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/http.proto";
+import "google/api/httpbody.proto";
+
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
-//option go_package = "./internal/api_proto/v1";
-option go_package = "github.com/zackmwangi/railway_desktop_be_go/internal/api_proto/v1";
+option go_package = "./internal/api_proto/v1";
+//option go_package = "github.com/zackmwangi/railway_desktop_be_go/internal/api_proto/v1";
 
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+
     info: {
-      title: "Railway desktop app - API Docs";
+      title: "Railway desktop app - Backend RESTful  API Docs ";
       version: "1.0";
       contact: {
-        name: "Desktop app support";
+        name: "Railway desktop support team";
         url: "https://desktop-support.railway-desktop.io";
         email: "support@railway-desktop.io";
       };
@@ -24,29 +29,35 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
         url: "https://railway-desktop.io/terms";
       };
     };
+
     schemes: HTTP;
     schemes: HTTPS;
     consumes: "application/json";
     produces: "application/json";
+    
   };
 
 //#####################
 
 service MybackendGrpcSvc{
+
     rpc GetUserInfoById (GetUserInfoByIdRequest) returns (GetUserInfoByIdResponse){
-        option (google.api.http) = {
-            get: "/v1/user/byid",
-          };
-          option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            parameters: {
-              headers: {
-                name: "Authorization";
-                description: "JWT authentication token issued during authentication i.e Bearer <<JWT_TOKEN>>";
-                type: STRING,
-                required: true;
-              };
+
+      option (google.api.http) = {
+          get: "/v1/user/byid",
+        };
+        
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+          parameters: {
+            headers: {
+              name: "Authorization";
+              description: "JWT authentication token issued during authentication i.e Bearer <<JWT_TOKEN>>";
+              type: STRING,
+              required: true;
             };
           };
+        };
+
     }
     rpc GetUserInfoByUsername (GetUserInfoByUsernameRequest) returns (GetUserInfoByUsernameResponse){
         option (google.api.http) = {
@@ -63,6 +74,47 @@ service MybackendGrpcSvc{
             };
           };
     }
+
+    //Railway - Projects
+    //Railway - Environments
+    //Railway - Variables
+    //Railway - Networks
+    //Railway - services
+    //Railway - Volumes
+
+    //List existing containers in project
+    //rpc GetServicesInProject() returns (){}
+    //Add new service container
+    //rpc CreateService() returns (){}
+
+    rpc ServiceCreateFromImage(ServiceCreateFromImageRequest) returns (ServiceCreateFromImageResponse){
+      option (google.api.http) = {
+        post: "/v1/service",
+        body: "*"
+      };
+    }
+
+    //rpc CreateServiceFromGithub() returns (){}
+
+    //rpc CreateServiceFromTemplate() returns (){}
+
+    //Restart the service
+    //rpc RestartService() returns (){}
+
+    //Take down the container
+    //rpc StopService() returns (){}
+    
+    rpc DeleteService(DeleteServiceRequest) returns (DeleteServiceResponse){
+      option (google.api.http) = {
+        delete: "/v1/service",
+        //body: "*"
+      };
+    }
+
+    //Attach to a network
+
+
+    //
 }
 
 //#######
@@ -70,7 +122,6 @@ message Error{
     uint32 code = 1;
     string message = 2;
 }
-
 //#######
 
 message GetUserInfoByIdRequest{
@@ -86,7 +137,6 @@ message GetUserInfoByIdResult{
 message GetUserInfoByIdResponse{
     Error error = 1;
     GetUserInfoByIdResult result = 2;
-    
 }
 
 //###
@@ -96,9 +146,9 @@ message GetUserInfoByUsernameRequest{
 }
 
 message GetUserInfoByUsernameResult{
-    string userName = 1;
-    string userId = 2;
-    string userFirstname = 3;
+  string userId = 1;
+  string userName = 2;
+  string userFirstname = 3;
     
 }
 
@@ -107,3 +157,28 @@ message GetUserInfoByUsernameResponse{
     GetUserInfoByUsernameResult result = 2;  
 }
 
+
+//################################################################
+
+message ServiceCreateFromImageRequest{
+  string imageUrl = 1;
+  string projectId = 2;
+  string environmentId = 3;
+}
+
+message ServiceCreateFromImageResponse{
+  string serviceId = 1;
+  Error error = 2;
+
+}
+
+//##################
+message DeleteServiceRequest{
+  string serviceId = 1;
+}
+
+message DeleteServiceResponse{
+  string serviceId = 1;
+  string environmentId = 2;
+  Error error = 3;
+}
