@@ -12,7 +12,10 @@ import (
 
 type (
 	RailwayServicesSvc interface {
-		ServiceCreateFromImage(context.Context, *v1.ServiceCreateFromImageRequest) (*v1.ServiceCreateFromImageResponse, error)
+		CreateService(context.Context, *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error)
+		//CreateServiceFromImage(context.Context, *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error)
+		//CreateServiceFromRepo(context.Context, *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error)
+		//sendCreateServiceRequest(context.Context, map[string]any, string) (*v1.CreateServiceResponse, error)
 		DeleteService(context.Context, *v1.DeleteServiceRequest) (*v1.DeleteServiceResponse, error)
 	}
 
@@ -32,52 +35,161 @@ func NewRailwayServicesSvc(gc *graphql.Client, l *zap.Logger) RailwayServicesSvc
 
 }
 
-func (s *RailwayServicesSvcStruct) ServiceCreateFromImage(ctx context.Context, req *v1.ServiceCreateFromImageRequest) (*v1.ServiceCreateFromImageResponse, error) {
-	//Execute against Railway Graphql API
+func (s *RailwayServicesSvcStruct) CreateService(ctx context.Context, req *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error) {
 
-	userInputs := entities.ServiceCreateFromImageRequestGqlInputs{
-		ProjectId:     req.ProjectId,
-		EnvironmentId: req.EnvironmentId,
-		Source: entities.SourceInput{
-			Image: req.ImageUrl,
+	serviceBaseResourceType := req.ServiceBaseResourceType.String()
+
+	switch serviceBaseResourceType {
+	case string(v1.ServiceBaseResourceType_image.Descriptor().Name()):
+		return s.CreateServiceFromImage(ctx, req)
+
+	case string(v1.ServiceBaseResourceType_repo.Descriptor().Name()):
+
+		return s.CreateServiceFromRepo(ctx, req)
+
+	default:
+		//empty service, no image/repo etc given
+		return s.CreateServiceFromEmpty(ctx, req)
+
+	}
+
+}
+
+func (s *RailwayServicesSvcStruct) CreateServiceFromEmpty(ctx context.Context, req *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error) {
+
+	//Use source:image from some hub
+	type ServiceCreateInput struct {
+		ProjectId     graphql.String `json:"projectId"`
+		EnvironmentId graphql.String `json:"environmentId"`
+		//Source        entities.ServiceSourceInputImage `json:"source"`
+		Name graphql.String `json:"name"`
+	}
+
+	reqInputs := ServiceCreateInput{
+		ProjectId:     graphql.String(req.ProjectId),
+		EnvironmentId: graphql.String(req.EnvironmentId),
+		/*
+			Source: entities.ServiceSourceInputImage{
+				Image: graphql.String(req.ImageUrl),
+			},
+		*/
+		Name: graphql.String(req.ServiceName),
+	}
+
+	variableInput := map[string]any{
+		"input": reqInputs,
+	}
+
+	return s.sendCreateServiceRequest(ctx, variableInput, req.EnvironmentId)
+
+}
+
+func (s *RailwayServicesSvcStruct) CreateServiceFromImage(ctx context.Context, req *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error) {
+
+	//Use source:image from some hub
+	type ServiceCreateInput struct {
+		ProjectId     graphql.String                   `json:"projectId"`
+		EnvironmentId graphql.String                   `json:"environmentId"`
+		Source        entities.ServiceSourceInputImage `json:"source"`
+		Name          graphql.String                   `json:"name"`
+	}
+
+	reqInputs := ServiceCreateInput{
+		ProjectId:     graphql.String(req.ProjectId),
+		EnvironmentId: graphql.String(req.EnvironmentId),
+		Source: entities.ServiceSourceInputImage{
+			Image: graphql.String(*req.ServiceBaseResourceUrl),
 		},
-		Name: "My Fresh mage",
+		Name: graphql.String(req.ServiceName),
 	}
 
-	variableMix := map[string]interface{}{
-		"input": userInputs,
+	variableInput := map[string]any{
+		"input": reqInputs,
 	}
 
-	//mutation := `
-	//mutation serviceCreate($input: ServiceCreateInput!) {
-	mutation := `
-	mutation serviceCreate{
-	serviceCreate(input: $input) {
-			id
-		}
-	}
-	`
-	//var mutationResponse entities.ServiceCreateResponseGql
+	return s.sendCreateServiceRequest(ctx, variableInput, req.EnvironmentId)
 
-	err := s.graphlClient.Mutate(ctx, &mutation, variableMix) // &mutationResponse)
+}
+
+func (s *RailwayServicesSvcStruct) CreateServiceFromRepo(ctx context.Context, req *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error) {
+	//Use source:repository and buildfile/Nix
+	type ServiceCreateInput struct {
+		ProjectId     graphql.String                  `json:"projectId"`
+		EnvironmentId graphql.String                  `json:"environmentId"`
+		Source        entities.ServiceSourceInputRepo `json:"source"`
+		Name          graphql.String                  `json:"name"`
+	}
+
+	reqInputs := ServiceCreateInput{
+		ProjectId:     graphql.String(req.ProjectId),
+		EnvironmentId: graphql.String(req.EnvironmentId),
+		Source: entities.ServiceSourceInputRepo{
+			Repo: graphql.String(*req.ServiceBaseResourceUrl),
+		},
+		Name: graphql.String(req.ServiceName),
+	}
+
+	variableInput := map[string]any{
+		"input": reqInputs,
+	}
+
+	return s.sendCreateServiceRequest(ctx, variableInput, req.EnvironmentId)
+
+}
+
+func (s *RailwayServicesSvcStruct) sendCreateServiceRequest(ctx context.Context, variableInput map[string]any, environmentId string) (*v1.CreateServiceResponse, error) {
+
+	var mutation entities.CreateServiceMutation
+
+	err := s.graphlClient.Mutate(ctx, &mutation, variableInput, graphql.OperationName("serviceCreate"))
 
 	if err != nil {
-		s.Applogger.Error(err.Error())
-		return &v1.ServiceCreateFromImageResponse{}, err
+		return &v1.CreateServiceResponse{
+			NewServiceId: "",
+			Error:        v1.ErrorBadRequest,
+		}, err
 	}
 
-	//
-	return &v1.ServiceCreateFromImageResponse{
-		ServiceId: "NewSVCID-RESP",
-		Error:     nil,
+	return &v1.CreateServiceResponse{
+		NewServiceId:  mutation.ServiceCreate.Id,
+		ProjectId:     mutation.ServiceCreate.ProjectId,
+		EnvironmentId: environmentId,
+		Error:         nil,
 	}, nil
 }
 
 func (s *RailwayServicesSvcStruct) DeleteService(ctx context.Context, req *v1.DeleteServiceRequest) (*v1.DeleteServiceResponse, error) {
 
+	variableInput := map[string]any{
+		"id":            req.ServiceId,
+		"environmentId": req.EnvironmentId,
+	}
+
+	var mutation entities.DeleteServiceMutation
+	//var mutation entities.CreateServiceMutation
+
+	err := s.graphlClient.Mutate(ctx, &mutation, variableInput, graphql.OperationName("serviceDelete"))
+
+	if err != nil {
+		return &v1.DeleteServiceResponse{
+			ServiceId:     "",
+			EnvironmentId: "",
+			Error:         v1.ErrorBadRequest,
+		}, err
+	}
+
+	if !mutation.ServiceDelete {
+		return &v1.DeleteServiceResponse{
+			ServiceId:     "",
+			EnvironmentId: "",
+			Error:         v1.ErrorInternal,
+		}, err
+
+	}
+
 	return &v1.DeleteServiceResponse{
-		ServiceId:     "NewSVCID-RESP",
-		EnvironmentId: "NewEnvID-RESP",
+		ServiceId:     req.ServiceId,
+		EnvironmentId: req.EnvironmentId,
 		Error:         nil,
 	}, nil
 

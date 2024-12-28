@@ -21,7 +21,10 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	MybackendGrpcSvc_GetUserInfoById_FullMethodName        = "/mybackend.v1.MybackendGrpcSvc/GetUserInfoById"
 	MybackendGrpcSvc_GetUserInfoByUsername_FullMethodName  = "/mybackend.v1.MybackendGrpcSvc/GetUserInfoByUsername"
-	MybackendGrpcSvc_ServiceCreateFromImage_FullMethodName = "/mybackend.v1.MybackendGrpcSvc/ServiceCreateFromImage"
+	MybackendGrpcSvc_FetchProjects_FullMethodName          = "/mybackend.v1.MybackendGrpcSvc/FetchProjects"
+	MybackendGrpcSvc_CreateService_FullMethodName          = "/mybackend.v1.MybackendGrpcSvc/CreateService"
+	MybackendGrpcSvc_CreateServiceFromImage_FullMethodName = "/mybackend.v1.MybackendGrpcSvc/CreateServiceFromImage"
+	MybackendGrpcSvc_CreateServiceFromRepo_FullMethodName  = "/mybackend.v1.MybackendGrpcSvc/CreateServiceFromRepo"
 	MybackendGrpcSvc_DeleteService_FullMethodName          = "/mybackend.v1.MybackendGrpcSvc/DeleteService"
 )
 
@@ -31,7 +34,11 @@ const (
 type MybackendGrpcSvcClient interface {
 	GetUserInfoById(ctx context.Context, in *GetUserInfoByIdRequest, opts ...grpc.CallOption) (*GetUserInfoByIdResponse, error)
 	GetUserInfoByUsername(ctx context.Context, in *GetUserInfoByUsernameRequest, opts ...grpc.CallOption) (*GetUserInfoByUsernameResponse, error)
-	ServiceCreateFromImage(ctx context.Context, in *ServiceCreateFromImageRequest, opts ...grpc.CallOption) (*ServiceCreateFromImageResponse, error)
+	// Railway - Projects
+	FetchProjects(ctx context.Context, in *FetchProjectRequest, opts ...grpc.CallOption) (*FetchProjectResponse, error)
+	CreateService(ctx context.Context, in *CreateServiceRequest, opts ...grpc.CallOption) (*CreateServiceResponse, error)
+	CreateServiceFromImage(ctx context.Context, in *CreateServiceFromImageRequest, opts ...grpc.CallOption) (*CreateServiceResponse, error)
+	CreateServiceFromRepo(ctx context.Context, in *CreateServiceFromRepoRequest, opts ...grpc.CallOption) (*CreateServiceResponse, error)
 	DeleteService(ctx context.Context, in *DeleteServiceRequest, opts ...grpc.CallOption) (*DeleteServiceResponse, error)
 }
 
@@ -63,10 +70,40 @@ func (c *mybackendGrpcSvcClient) GetUserInfoByUsername(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *mybackendGrpcSvcClient) ServiceCreateFromImage(ctx context.Context, in *ServiceCreateFromImageRequest, opts ...grpc.CallOption) (*ServiceCreateFromImageResponse, error) {
+func (c *mybackendGrpcSvcClient) FetchProjects(ctx context.Context, in *FetchProjectRequest, opts ...grpc.CallOption) (*FetchProjectResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ServiceCreateFromImageResponse)
-	err := c.cc.Invoke(ctx, MybackendGrpcSvc_ServiceCreateFromImage_FullMethodName, in, out, cOpts...)
+	out := new(FetchProjectResponse)
+	err := c.cc.Invoke(ctx, MybackendGrpcSvc_FetchProjects_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mybackendGrpcSvcClient) CreateService(ctx context.Context, in *CreateServiceRequest, opts ...grpc.CallOption) (*CreateServiceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateServiceResponse)
+	err := c.cc.Invoke(ctx, MybackendGrpcSvc_CreateService_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mybackendGrpcSvcClient) CreateServiceFromImage(ctx context.Context, in *CreateServiceFromImageRequest, opts ...grpc.CallOption) (*CreateServiceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateServiceResponse)
+	err := c.cc.Invoke(ctx, MybackendGrpcSvc_CreateServiceFromImage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mybackendGrpcSvcClient) CreateServiceFromRepo(ctx context.Context, in *CreateServiceFromRepoRequest, opts ...grpc.CallOption) (*CreateServiceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateServiceResponse)
+	err := c.cc.Invoke(ctx, MybackendGrpcSvc_CreateServiceFromRepo_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +126,11 @@ func (c *mybackendGrpcSvcClient) DeleteService(ctx context.Context, in *DeleteSe
 type MybackendGrpcSvcServer interface {
 	GetUserInfoById(context.Context, *GetUserInfoByIdRequest) (*GetUserInfoByIdResponse, error)
 	GetUserInfoByUsername(context.Context, *GetUserInfoByUsernameRequest) (*GetUserInfoByUsernameResponse, error)
-	ServiceCreateFromImage(context.Context, *ServiceCreateFromImageRequest) (*ServiceCreateFromImageResponse, error)
+	// Railway - Projects
+	FetchProjects(context.Context, *FetchProjectRequest) (*FetchProjectResponse, error)
+	CreateService(context.Context, *CreateServiceRequest) (*CreateServiceResponse, error)
+	CreateServiceFromImage(context.Context, *CreateServiceFromImageRequest) (*CreateServiceResponse, error)
+	CreateServiceFromRepo(context.Context, *CreateServiceFromRepoRequest) (*CreateServiceResponse, error)
 	DeleteService(context.Context, *DeleteServiceRequest) (*DeleteServiceResponse, error)
 }
 
@@ -106,8 +147,17 @@ func (UnimplementedMybackendGrpcSvcServer) GetUserInfoById(context.Context, *Get
 func (UnimplementedMybackendGrpcSvcServer) GetUserInfoByUsername(context.Context, *GetUserInfoByUsernameRequest) (*GetUserInfoByUsernameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfoByUsername not implemented")
 }
-func (UnimplementedMybackendGrpcSvcServer) ServiceCreateFromImage(context.Context, *ServiceCreateFromImageRequest) (*ServiceCreateFromImageResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ServiceCreateFromImage not implemented")
+func (UnimplementedMybackendGrpcSvcServer) FetchProjects(context.Context, *FetchProjectRequest) (*FetchProjectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FetchProjects not implemented")
+}
+func (UnimplementedMybackendGrpcSvcServer) CreateService(context.Context, *CreateServiceRequest) (*CreateServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateService not implemented")
+}
+func (UnimplementedMybackendGrpcSvcServer) CreateServiceFromImage(context.Context, *CreateServiceFromImageRequest) (*CreateServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateServiceFromImage not implemented")
+}
+func (UnimplementedMybackendGrpcSvcServer) CreateServiceFromRepo(context.Context, *CreateServiceFromRepoRequest) (*CreateServiceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateServiceFromRepo not implemented")
 }
 func (UnimplementedMybackendGrpcSvcServer) DeleteService(context.Context, *DeleteServiceRequest) (*DeleteServiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteService not implemented")
@@ -168,20 +218,74 @@ func _MybackendGrpcSvc_GetUserInfoByUsername_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MybackendGrpcSvc_ServiceCreateFromImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ServiceCreateFromImageRequest)
+func _MybackendGrpcSvc_FetchProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchProjectRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MybackendGrpcSvcServer).ServiceCreateFromImage(ctx, in)
+		return srv.(MybackendGrpcSvcServer).FetchProjects(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MybackendGrpcSvc_ServiceCreateFromImage_FullMethodName,
+		FullMethod: MybackendGrpcSvc_FetchProjects_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MybackendGrpcSvcServer).ServiceCreateFromImage(ctx, req.(*ServiceCreateFromImageRequest))
+		return srv.(MybackendGrpcSvcServer).FetchProjects(ctx, req.(*FetchProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MybackendGrpcSvc_CreateService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MybackendGrpcSvcServer).CreateService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MybackendGrpcSvc_CreateService_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MybackendGrpcSvcServer).CreateService(ctx, req.(*CreateServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MybackendGrpcSvc_CreateServiceFromImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateServiceFromImageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MybackendGrpcSvcServer).CreateServiceFromImage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MybackendGrpcSvc_CreateServiceFromImage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MybackendGrpcSvcServer).CreateServiceFromImage(ctx, req.(*CreateServiceFromImageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MybackendGrpcSvc_CreateServiceFromRepo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateServiceFromRepoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MybackendGrpcSvcServer).CreateServiceFromRepo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MybackendGrpcSvc_CreateServiceFromRepo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MybackendGrpcSvcServer).CreateServiceFromRepo(ctx, req.(*CreateServiceFromRepoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -220,8 +324,20 @@ var MybackendGrpcSvc_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MybackendGrpcSvc_GetUserInfoByUsername_Handler,
 		},
 		{
-			MethodName: "ServiceCreateFromImage",
-			Handler:    _MybackendGrpcSvc_ServiceCreateFromImage_Handler,
+			MethodName: "FetchProjects",
+			Handler:    _MybackendGrpcSvc_FetchProjects_Handler,
+		},
+		{
+			MethodName: "CreateService",
+			Handler:    _MybackendGrpcSvc_CreateService_Handler,
+		},
+		{
+			MethodName: "CreateServiceFromImage",
+			Handler:    _MybackendGrpcSvc_CreateServiceFromImage_Handler,
+		},
+		{
+			MethodName: "CreateServiceFromRepo",
+			Handler:    _MybackendGrpcSvc_CreateServiceFromRepo_Handler,
 		},
 		{
 			MethodName: "DeleteService",

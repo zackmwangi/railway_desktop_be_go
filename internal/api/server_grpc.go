@@ -69,22 +69,62 @@ func (s *MybackendGrpcSvcServerImpl) GetUserInfoByUsername(ctx context.Context, 
 //Railway
 //Projects+Environments
 
+func (s *MybackendGrpcSvcServerImpl) FetchProjects(ctx context.Context, req *v1.FetchProjectRequest) (*v1.FetchProjectResponse, error) {
+	return s.railwayGraphqlServicesCollection.RailwayProjectsSvc.FetchProjectsQuery(ctx, req)
+}
+
+//###############
 // Services+Deployments
-// ServiceCreateFromImage()
-func (s *MybackendGrpcSvcServerImpl) ServiceCreateFromImage(ctx context.Context, req *v1.ServiceCreateFromImageRequest) (*v1.ServiceCreateFromImageResponse, error) {
 
-	//read the service image url
+func (s *MybackendGrpcSvcServerImpl) CreateService(ctx context.Context, req *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error) {
+	/*
+		switch req.BaseResourceType {
+		case v1.BaseResourceType:
 
-	return s.railwayGraphqlServicesCollection.RailwayServicesSvc.ServiceCreateFromImage(ctx, req)
+			break
+
+		default:
+			//empty service
+
+			break
+
+		}
+	*/
+
+	return s.railwayGraphqlServicesCollection.RailwayServicesSvc.CreateService(ctx, req)
 
 }
+
+/*
+func (s *MybackendGrpcSvcServerImpl) CreateServiceFromEmpty(ctx context.Context, req *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error) {
+
+	return s.railwayGraphqlServicesCollection.RailwayServicesSvc.CreateServiceFromEmpty(ctx, req)
+
+}
+
+// CreateServiceFromImage()
+func (s *MybackendGrpcSvcServerImpl) CreateServiceFromImage(ctx context.Context, req *v1.CreateServiceFromImageRequest) (*v1.CreateServiceResponse, error) {
+
+	return s.railwayGraphqlServicesCollection.RailwayServicesSvc.CreateServiceFromImage(ctx, req)
+
+}
+
+func (s *MybackendGrpcSvcServerImpl) CreateServiceFromRepo(ctx context.Context, req *v1.CreateServiceFromRepoRequest) (*v1.CreateServiceResponse, error) {
+
+	return s.railwayGraphqlServicesCollection.RailwayServicesSvc.CreateServiceFromRepo(ctx, req)
+
+}
+*/
 
 func (s *MybackendGrpcSvcServerImpl) DeleteService(ctx context.Context, req *v1.DeleteServiceRequest) (*v1.DeleteServiceResponse, error) {
-	return &v1.DeleteServiceResponse{}, nil
+	//return &v1.DeleteServiceResponse{}, nil
+	return s.railwayGraphqlServicesCollection.RailwayServicesSvc.DeleteService(ctx, req)
 }
 
+//###############
 //Variables
 
+//###############
 //Volumes
 
 //

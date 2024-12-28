@@ -29,6 +29,29 @@
     "application/json"
   ],
   "paths": {
+    "/v1/project": {
+      "get": {
+        "summary": "Railway - Projects",
+        "operationId": "MybackendGrpcSvc_FetchProjects",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1FetchProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "MybackendGrpcSvc"
+        ]
+      }
+    },
     "/v1/service": {
       "delete": {
         "operationId": "MybackendGrpcSvc_DeleteService",
@@ -52,6 +75,12 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -59,12 +88,12 @@
         ]
       },
       "post": {
-        "operationId": "MybackendGrpcSvc_ServiceCreateFromImage",
+        "operationId": "MybackendGrpcSvc_CreateService",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1ServiceCreateFromImageResponse"
+              "$ref": "#/definitions/v1CreateServiceResponse"
             }
           },
           "default": {
@@ -80,7 +109,71 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1ServiceCreateFromImageRequest"
+              "$ref": "#/definitions/v1CreateServiceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "MybackendGrpcSvc"
+        ]
+      }
+    },
+    "/v1/service/fromimage": {
+      "post": {
+        "operationId": "MybackendGrpcSvc_CreateServiceFromImage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateServiceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateServiceFromImageRequest"
+            }
+          }
+        ],
+        "tags": [
+          "MybackendGrpcSvc"
+        ]
+      }
+    },
+    "/v1/service/fromrepo": {
+      "post": {
+        "operationId": "MybackendGrpcSvc_CreateServiceFromRepo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateServiceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateServiceFromRepoRequest"
             }
           }
         ],
@@ -195,10 +288,13 @@
         }
       }
     },
-    "v1ServiceCreateFromImageRequest": {
+    "v1CreateServiceFromImageRequest": {
       "type": "object",
       "properties": {
         "imageUrl": {
+          "type": "string"
+        },
+        "serviceName": {
           "type": "string"
         },
         "projectId": {
@@ -209,10 +305,54 @@
         }
       }
     },
-    "v1ServiceCreateFromImageResponse": {
+    "v1CreateServiceFromRepoRequest": {
       "type": "object",
       "properties": {
-        "serviceId": {
+        "repoUrl": {
+          "type": "string"
+        },
+        "serviceName": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "environmentId": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateServiceRequest": {
+      "type": "object",
+      "properties": {
+        "serviceBaseResourceType": {
+          "$ref": "#/definitions/v1ServiceBaseResourceType",
+          "title": "Allow creation of an empty service"
+        },
+        "serviceBaseResourceUrl": {
+          "type": "string"
+        },
+        "serviceName": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "environmentId": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateServiceResponse": {
+      "type": "object",
+      "properties": {
+        "newServiceId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "environmentId": {
           "type": "string"
         },
         "error": {
@@ -246,6 +386,21 @@
         }
       },
       "title": "#######"
+    },
+    "v1FetchProjectResponse": {
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ProjectDetails"
+          }
+        },
+        "error": {
+          "$ref": "#/definitions/v1Error"
+        }
+      }
     },
     "v1GetUserInfoByIdResponse": {
       "type": "object",
@@ -296,6 +451,26 @@
           "type": "string"
         }
       }
+    },
+    "v1ProjectDetails": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "projectName": {
+          "type": "string"
+        }
+      }
+    },
+    "v1ServiceBaseResourceType": {
+      "type": "string",
+      "enum": [
+        "image",
+        "repo"
+      ],
+      "default": "image",
+      "title": "- image: EmptyService = 0;"
     }
   }
 }

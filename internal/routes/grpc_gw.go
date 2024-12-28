@@ -14,14 +14,13 @@ func AddGrpcGatewayEndpoints(httpRoutingEngine *gin.Engine, s *runtime.ServeMux)
 	vxRouterGroup.POST("/user/*{http_to_grpc_gateway}", gin.WrapH(s))
 
 	//Railway
-	/*
-		vxRouterGroup.GET("/service/*{http_to_grpc_gateway}", gin.WrapH(s))
-		vxRouterGroup.POST("/service/*{http_to_grpc_gateway}", gin.WrapH(s))
-		vxRouterGroup.PUT("/service/*{http_to_grpc_gateway}", gin.WrapH(s))
-		vxRouterGroup.DELETE("/service/*{http_to_grpc_gateway}", gin.WrapH(s))
-	*/
+	//Projects
+	vxRouterGroup.GET("/project", gin.WrapH(s))
+	//Services
 	vxRouterGroup.GET("/service", gin.WrapH(s))
 	vxRouterGroup.POST("/service", gin.WrapH(s))
+	vxRouterGroup.POST("/service/fromimage", gin.WrapH(s))
+	vxRouterGroup.POST("/service/fromrepo", gin.WrapH(s))
 	vxRouterGroup.PUT("/service", gin.WrapH(s))
 	vxRouterGroup.DELETE("/service", gin.WrapH(s))
 

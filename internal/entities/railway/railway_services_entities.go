@@ -1,35 +1,25 @@
 package entities
 
+import "github.com/hasura/go-graphql-client"
+
 type (
-	ServiceCreateFromImageRequestGqlInputs struct {
-		ProjectId     string      `json:"projectId"`
-		EnvironmentId string      `json:"environmentId"`
-		Source        SourceInput `json:"source"`
-		Name          string      `json:"name,omitempty"`
+	CreateServiceMutation struct {
+		ServiceCreate struct {
+			Id        string `json:"id"`
+			ProjectId string `json:"projectId"`
+		} `graphql:"serviceCreate(input: $input)"`
 	}
 
-	SourceInput struct {
-		Image string `json:"image"`
+	ServiceSourceInputImage struct {
+		Image graphql.String `json:"image"`
 	}
 
-	//ServiceCreateFromImageResponseGql struct {
-	ServiceCreateResponseGql struct {
-		//ServiceCreate struct {
-		Id string `json:"id"`
-		//}
+	ServiceSourceInputRepo struct {
+		Repo graphql.String `json:"repo"`
 	}
 
-	/*
-		ServiceCreateMutation struct {
-			ServiceCreate struct {
-				Id string `json:"id"`
-			} `json:"serviceCreate(input: $input)"`
-		}
-	*/
-
-	DeleteServiceRequestGql struct {
-	}
-
-	DeleteServiceResponseGql struct {
+	//################################
+	DeleteServiceMutation struct {
+		ServiceDelete bool `graphql:"serviceDelete(id: $id, environmentId: $environmentId)"`
 	}
 )

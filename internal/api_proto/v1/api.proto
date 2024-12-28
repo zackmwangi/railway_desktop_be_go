@@ -76,6 +76,13 @@ service MybackendGrpcSvc{
     }
 
     //Railway - Projects
+    rpc FetchProjects(FetchProjectRequest) returns (FetchProjectResponse){
+      option (google.api.http) = {
+        get: "/v1/project",
+        //sbody: "*"
+      };
+
+    }
     //Railway - Environments
     //Railway - Variables
     //Railway - Networks
@@ -87,9 +94,23 @@ service MybackendGrpcSvc{
     //Add new service container
     //rpc CreateService() returns (){}
 
-    rpc ServiceCreateFromImage(ServiceCreateFromImageRequest) returns (ServiceCreateFromImageResponse){
+    rpc CreateService(CreateServiceRequest) returns (CreateServiceResponse){
       option (google.api.http) = {
         post: "/v1/service",
+        body: "*"
+      };
+    }
+
+    rpc CreateServiceFromImage(CreateServiceFromImageRequest) returns (CreateServiceResponse){
+      option (google.api.http) = {
+        post: "/v1/service/fromimage",
+        body: "*"
+      };
+    }
+
+    rpc CreateServiceFromRepo(CreateServiceFromRepoRequest) returns (CreateServiceResponse){
+      option (google.api.http) = {
+        post: "/v1/service/fromrepo",
         body: "*"
       };
     }
@@ -160,21 +181,66 @@ message GetUserInfoByUsernameResponse{
 
 //################################################################
 
-message ServiceCreateFromImageRequest{
-  string imageUrl = 1;
-  string projectId = 2;
-  string environmentId = 3;
+message  FetchProjectRequest{
+
 }
 
-message ServiceCreateFromImageResponse{
-  string serviceId = 1;
+message ProjectDetails{
+  string projectId = 1;
+  string projectName = 2;
+}
+
+message FetchProjectResponse{
+  repeated ProjectDetails projects = 1;
   Error error = 2;
+
+}
+
+//######################
+
+enum ServiceBaseResourceType{
+  //EmptyService = 0;
+  image = 0;
+  repo = 1;
+}
+
+message CreateServiceRequest{
+  //Allow creation of an empty service
+  optional ServiceBaseResourceType serviceBaseResourceType = 1;
+  optional string serviceBaseResourceUrl = 2;
+  string serviceName = 3;
+  string projectId = 4;
+  string environmentId = 5;
+}
+
+
+
+message CreateServiceFromImageRequest{
+  string imageUrl = 1;
+  string serviceName = 2;
+  string projectId = 3;
+  string environmentId = 4;
+}
+
+message CreateServiceFromRepoRequest{
+  string repoUrl = 1;
+  string serviceName = 2;
+  string projectId = 3;
+  string environmentId = 4;
+}
+
+message CreateServiceResponse{
+  string newServiceId = 1;
+  string projectId = 2;
+  string environmentId = 3;
+  Error error = 4;
 
 }
 
 //##################
 message DeleteServiceRequest{
   string serviceId = 1;
+  string environmentId = 2;
 }
 
 message DeleteServiceResponse{

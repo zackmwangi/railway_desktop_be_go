@@ -16,6 +16,7 @@ type (
 
 	RailwayGraphqlServicesCollection struct {
 		//Projects+Env
+		RailwayProjectsSvc RailwayProjectsSvc
 		//Services+Deployments
 		RailwayServicesSvc RailwayServicesSvc
 		//Variables
@@ -24,7 +25,7 @@ type (
 )
 
 func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("Authorization", "Bearer: "+t.key)
+	req.Header.Set("Authorization", "Bearer "+t.key)
 	return t.wrapped.RoundTrip(req)
 }
 
@@ -40,13 +41,16 @@ func InitRailwayGraphqlServicesCollection(
 		},
 	}
 
-	graphqlClient := graphql.NewClient(ac.RailwayGraphqlURL, &httpClient)
+	graphqlClient := graphql.NewClient(ac.RailwayGraphqlURL, &httpClient).WithDebug(true)
+
+	railwayProjectsSvc := NewRailwayProjectssSvc(graphqlClient, ac.AppLogger)
 	railwayServicesSvc := NewRailwayServicesSvc(graphqlClient, ac.AppLogger)
 
 	ac.AppLogger.Sugar().Infof("Sending to url %s, with token %s", ac.RailwayGraphqlURL, ac.RailwayGraphqlToken)
 
 	return &RailwayGraphqlServicesCollection{
 		//Applogger:          ac.AppLogger,
+		RailwayProjectsSvc: railwayProjectsSvc,
 		RailwayServicesSvc: railwayServicesSvc,
 	}
 
