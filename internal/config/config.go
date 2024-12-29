@@ -30,9 +30,8 @@ type (
 
 		//###########
 		//Railway
-		RailwayGraphqlURL string
+		RailwayGraphqlURL   string
 		RailwayGraphqlToken string
-
 	}
 )
 
@@ -55,7 +54,7 @@ func InitAppConfig() *AppConfig {
 
 	//appEnvDefault := "prod"
 
-	appListenHostnameDefault := "127.0.0.1"
+	appListenHostnameDefault := "0.0.0.0"
 	//appListenHostnameDefault := "172.20.0.28"
 	appListenPortHttpDefault := "8081"
 	appListenPortGrpcDefault := "8082"
@@ -100,7 +99,7 @@ func InitAppConfig() *AppConfig {
 		HealthEndpointLive:   healthEndpointLive,
 		HealthEndpointReady:  healthEndpointReady,
 
-		RailwayGraphqlURL: railwayGraphqlURL,
+		RailwayGraphqlURL:   railwayGraphqlURL,
 		RailwayGraphqlToken: railwayGraphqlToken,
 	}
 

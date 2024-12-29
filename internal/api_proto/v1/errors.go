@@ -21,6 +21,11 @@ var (
 		Message: "bad request",
 	}
 
+	ErrorBadRequestNoServiceBaseResourceType = &Error{
+		Code:    108,
+		Message: "bad request, no serviceBaseResourceType specified",
+	}
+
 	//TODO: Add more service-specific errors
 
 )

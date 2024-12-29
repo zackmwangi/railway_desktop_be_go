@@ -15,7 +15,7 @@ type (
 		CreateService(context.Context, *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error)
 		//CreateServiceFromImage(context.Context, *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error)
 		//CreateServiceFromRepo(context.Context, *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error)
-		//sendCreateServiceRequest(context.Context, map[string]any, string) (*v1.CreateServiceResponse, error)
+		//SendCreateServiceRequest(context.Context, map[string]any, string) (*v1.CreateServiceResponse, error)
 		DeleteService(context.Context, *v1.DeleteServiceRequest) (*v1.DeleteServiceResponse, error)
 	}
 
@@ -39,11 +39,15 @@ func (s *RailwayServicesSvcStruct) CreateService(ctx context.Context, req *v1.Cr
 
 	serviceBaseResourceType := req.ServiceBaseResourceType.String()
 
+	serviceBaseResourceTypeImage := v1.ServiceBaseResourceType_name[0]
+	serviceBaseResourceTypeRepo := v1.ServiceBaseResourceType_name[0]
+
 	switch serviceBaseResourceType {
-	case string(v1.ServiceBaseResourceType_image.Descriptor().Name()):
+	case string(serviceBaseResourceTypeImage):
+
 		return s.CreateServiceFromImage(ctx, req)
 
-	case string(v1.ServiceBaseResourceType_repo.Descriptor().Name()):
+	case string(serviceBaseResourceTypeRepo):
 
 		return s.CreateServiceFromRepo(ctx, req)
 
@@ -58,29 +62,31 @@ func (s *RailwayServicesSvcStruct) CreateService(ctx context.Context, req *v1.Cr
 func (s *RailwayServicesSvcStruct) CreateServiceFromEmpty(ctx context.Context, req *v1.CreateServiceRequest) (*v1.CreateServiceResponse, error) {
 
 	//Use source:image from some hub
-	type ServiceCreateInput struct {
-		ProjectId     graphql.String `json:"projectId"`
-		EnvironmentId graphql.String `json:"environmentId"`
-		//Source        entities.ServiceSourceInputImage `json:"source"`
-		Name graphql.String `json:"name"`
-	}
+	/*
+		type ServiceCreateInput struct {
+			ProjectId     graphql.String `json:"projectId"`
+			EnvironmentId graphql.String `json:"environmentId"`
 
-	reqInputs := ServiceCreateInput{
-		ProjectId:     graphql.String(req.ProjectId),
-		EnvironmentId: graphql.String(req.EnvironmentId),
-		/*
-			Source: entities.ServiceSourceInputImage{
-				Image: graphql.String(req.ImageUrl),
-			},
-		*/
-		Name: graphql.String(req.ServiceName),
-	}
+			Name graphql.String `json:"name"`
+		}
 
-	variableInput := map[string]any{
-		"input": reqInputs,
-	}
+		reqInputs := ServiceCreateInput{
+			ProjectId:     graphql.String(req.ProjectId),
+			EnvironmentId: graphql.String(req.EnvironmentId),
 
-	return s.sendCreateServiceRequest(ctx, variableInput, req.EnvironmentId)
+			Name: graphql.String(req.ServiceName),
+		}
+
+		variableInput := map[string]any{
+			"input": reqInputs,
+		}
+
+		return s.SendCreateServiceRequest(ctx, variableInput, req.EnvironmentId)
+	*/
+
+	return &v1.CreateServiceResponse{
+		Error: v1.ErrorBadRequestNoServiceBaseResourceType,
+	}, v1.ErrorBadRequestNoServiceBaseResourceType
 
 }
 
@@ -98,7 +104,7 @@ func (s *RailwayServicesSvcStruct) CreateServiceFromImage(ctx context.Context, r
 		ProjectId:     graphql.String(req.ProjectId),
 		EnvironmentId: graphql.String(req.EnvironmentId),
 		Source: entities.ServiceSourceInputImage{
-			Image: graphql.String(*req.ServiceBaseResourceUrl),
+			Image: graphql.String(req.ServiceBaseResourceUrl),
 		},
 		Name: graphql.String(req.ServiceName),
 	}
@@ -107,7 +113,7 @@ func (s *RailwayServicesSvcStruct) CreateServiceFromImage(ctx context.Context, r
 		"input": reqInputs,
 	}
 
-	return s.sendCreateServiceRequest(ctx, variableInput, req.EnvironmentId)
+	return s.SendCreateServiceRequest(ctx, variableInput, req.EnvironmentId)
 
 }
 
@@ -124,7 +130,7 @@ func (s *RailwayServicesSvcStruct) CreateServiceFromRepo(ctx context.Context, re
 		ProjectId:     graphql.String(req.ProjectId),
 		EnvironmentId: graphql.String(req.EnvironmentId),
 		Source: entities.ServiceSourceInputRepo{
-			Repo: graphql.String(*req.ServiceBaseResourceUrl),
+			Repo: graphql.String(req.ServiceBaseResourceUrl),
 		},
 		Name: graphql.String(req.ServiceName),
 	}
@@ -133,11 +139,11 @@ func (s *RailwayServicesSvcStruct) CreateServiceFromRepo(ctx context.Context, re
 		"input": reqInputs,
 	}
 
-	return s.sendCreateServiceRequest(ctx, variableInput, req.EnvironmentId)
+	return s.SendCreateServiceRequest(ctx, variableInput, req.EnvironmentId)
 
 }
 
-func (s *RailwayServicesSvcStruct) sendCreateServiceRequest(ctx context.Context, variableInput map[string]any, environmentId string) (*v1.CreateServiceResponse, error) {
+func (s *RailwayServicesSvcStruct) SendCreateServiceRequest(ctx context.Context, variableInput map[string]any, environmentId string) (*v1.CreateServiceResponse, error) {
 
 	var mutation entities.CreateServiceMutation
 

@@ -206,8 +206,8 @@ enum ServiceBaseResourceType{
 
 message CreateServiceRequest{
   //Allow creation of an empty service
-  optional ServiceBaseResourceType serviceBaseResourceType = 1;
-  optional string serviceBaseResourceUrl = 2;
+  ServiceBaseResourceType serviceBaseResourceType = 1;
+  string serviceBaseResourceUrl = 2;
   string serviceName = 3;
   string projectId = 4;
   string environmentId = 5;

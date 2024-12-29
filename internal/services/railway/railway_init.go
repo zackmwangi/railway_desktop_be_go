@@ -46,7 +46,7 @@ func InitRailwayGraphqlServicesCollection(
 	railwayProjectsSvc := NewRailwayProjectssSvc(graphqlClient, ac.AppLogger)
 	railwayServicesSvc := NewRailwayServicesSvc(graphqlClient, ac.AppLogger)
 
-	ac.AppLogger.Sugar().Infof("Sending to url %s, with token %s", ac.RailwayGraphqlURL, ac.RailwayGraphqlToken)
+	//ac.AppLogger.Sugar().Infof("Sending to url %s, with token %s", ac.RailwayGraphqlURL, ac.RailwayGraphqlToken)
 
 	return &RailwayGraphqlServicesCollection{
 		//Applogger:          ac.AppLogger,
