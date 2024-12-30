@@ -1,6 +1,6 @@
 # Welcome to the Railway desktop app API in golang
 
-This API exposes RESTful/gRPC endoints to be consumed by a mobile/web frontend.
+This API exposes RESTful/gRPC endpoints to be consumed by a mobile/web frontend.
 
 The API utilizes gRPC gateway for dual-accessibility.
 
